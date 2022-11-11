@@ -50,11 +50,13 @@ public class PlayerController : MonoBehaviour
     bool dashing;
     bool dead;
 
+    //for wall detection
     CheckWall checkwall;
-
+    
 
 
     Vector3 originalPos;
+    Vector3 Poc;
 
 
     [Header("Health")]
@@ -94,20 +96,22 @@ public class PlayerController : MonoBehaviour
         //WallJump
         if(checkwall.onWall && !isGrounded)
         {
+ 
             print("onWall");
             RaycastHit testHit;
-            if (Physics.Raycast(transform.position, moveVelocity, out testHit, 1f, wallMask))
+            if (Physics.Raycast(transform.position, checkwall.pos, out testHit, 1f, wallMask))
             {
+                
                 print("Against Wall");
                 if (rb.velocity.y < -1f)
                 {
                     rb.velocity = new Vector3(Mathf.Clamp(rb.velocity.x, -1f, 1f), -2f * clingFade, Mathf.Clamp(rb.velocity.z, -1f, 1f));
                     print("Sliding down");
                 }
-
             }
             if (Input.GetButtonDown("Jump"))
             {
+                jumpQueued = true;
                 rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
                 //Vector3 wallJumpPos = base.transform.position - checkwall.GetClosestPoint();
 
@@ -117,7 +121,9 @@ public class PlayerController : MonoBehaviour
                 print("Jumping");
                 Vector3 tempVec = new Vector3(testHit.normal.x, 1.5f, testHit.normal.z);
                 rb.AddForce(tempVec * 5, ForceMode.Impulse);
+                Invoke("ResetJump", 0.2f);
             }
+
         }
         //Dash
         if (dashing)
@@ -208,7 +214,6 @@ public class PlayerController : MonoBehaviour
 
     }
 
-
     void Dash()
     {
         moveVelocity2 = new Vector3(DashVelocity.x * walkSpeed, 0, DashVelocity.z * walkSpeed);
@@ -232,6 +237,7 @@ public class PlayerController : MonoBehaviour
 
     void ResetJump()
     {
+
         jumpQueued = true;
     }
 
