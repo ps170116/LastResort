@@ -32,7 +32,7 @@ public class Interact : MonoBehaviour
                 Interactable interactable = hit.collider.gameObject.GetComponent<Interactable>();
                 itemText.text = interactable.interactableName;
                 itemText.gameObject.SetActive(true);
-                if (Input.GetButton("Interact"))
+                if (Input.GetButtonDown("Interact"))
                 {
                     interactable.Interact();
                 }
