@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DeveloperConsole;
+using Unity.VisualScripting;
 
 public class CameraController : MonoBehaviour
 {
@@ -21,25 +23,68 @@ public class CameraController : MonoBehaviour
     float rotX;
     float rotY;
 
+    public bool camEnabled = true;
+
+    public static CameraController instance;
+
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        mouseX = Input.GetAxis("Mouse X") * sensX;
-        mouseY = Input.GetAxis("Mouse Y") * sensY;
+        if(camEnabled)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
-        rotX -= mouseY;
-        rotY += mouseX;
+            mouseX = Input.GetAxis("Mouse X") * sensX;
+            mouseY = Input.GetAxis("Mouse Y") * sensY;
 
-        rotX = Mathf.Clamp(rotX, minX, maxX);
+            rotX -= mouseY;
+            rotY += mouseX;
 
-        cam.transform.localRotation = Quaternion.Euler(rotX, rotY, 0);
-        orientation.transform.localRotation = Quaternion.Euler(0, rotY, 0);
+            rotX = Mathf.Clamp(rotX, minX, maxX);
+
+            cam.transform.localRotation = Quaternion.Euler(rotX, rotY, 0);
+            orientation.transform.localRotation = Quaternion.Euler(0, rotY, 0);
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+ 
+    }
+
+
+    public void EnableCam(bool enabled)
+    {
+        camEnabled = enabled;
+    }
+
+    [ConCommand("set_sensX", "set the X sensitivity of camera")]
+    public static void SetSensX(int sens = 5)
+    {
+        instance.sensX = sens;   
+    }
+
+    [ConCommand("set_sensY", "set the Y sensitivity of camera")]
+    public static void SetSensY(int sens = 5)
+    {
+        instance.sensY = sens;
     }
 }

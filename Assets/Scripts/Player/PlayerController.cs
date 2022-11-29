@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
+using DeveloperConsole;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] float walkSpeed;
+    public float walkSpeed;
     [SerializeField] float jumpPower;
     [SerializeField] float wallJumpPower;
     [SerializeField] float airAcceleration;
@@ -68,9 +70,20 @@ public class PlayerController : MonoBehaviour
 
     GameObject testWall;
 
+
+    public static PlayerController instance;
+    public bool onConsole;
+
+    void Awake()
+    {
+        instance = this;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        
+
         rb = GetComponent<Rigidbody>();
         collider = GetComponent<CapsuleCollider>();
 
@@ -83,7 +96,10 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GetInput();
+        if(!onConsole)
+        {
+            GetInput();
+        }
         //QueueJump();
 
         //GroundCheck
@@ -274,6 +290,23 @@ public class PlayerController : MonoBehaviour
         return Vector3.ProjectOnPlane(moveVelocity, slopeHit.normal);
     }
 
+    [ConCommand("set_speed", "Set speed of player")]
+    public static void SetSpeed(float speed = 9 )
+    {
+        instance.walkSpeed = speed;
+        
+    }
+
+    [ConCommand("set_jump", "Set jump height of player")]
+    public static void SetJump(float jumpPower = 8)
+    {
+        instance.jumpPower = jumpPower;
+    }
+
+    
+    
+    
+    
 
 
     //private void QueueJump()d
