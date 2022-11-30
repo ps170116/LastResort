@@ -17,6 +17,7 @@ namespace DeveloperConsole
         public GameObject console;
         public CameraController cameraControler;
         public UnityEngine.UI.Button inputButton;
+        public UnityEngine.UI.Button CloseButton;
         public TMP_InputField input;
 
         public TMP_Text textOutput;
@@ -36,6 +37,7 @@ namespace DeveloperConsole
         {
             DevConsole.LoadCommands(new Assembly[] { Assembly.GetAssembly(typeof(ConCommand)) });
             inputButton.onClick.AddListener(GetInput);
+            CloseButton.onClick.AddListener(CloseConsole);
         }
 
         // Update is called once per frame
@@ -73,6 +75,14 @@ namespace DeveloperConsole
             string[] command = input.text.Split(' ');
             DevConsole.RunCommand(command);
             input.text = "";
+        }
+
+        public void CloseConsole()
+        {
+            if (consoleEnabled)
+            {
+                consoleEnabled = false;
+            }
         }
     }
 

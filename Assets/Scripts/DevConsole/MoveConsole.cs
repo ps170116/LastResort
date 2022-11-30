@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class MoveConsole : MonoBehaviour
 {
+    public Transform Console;
 
- 
+    private void Update()
+    {
+
+
+    }
+
 }

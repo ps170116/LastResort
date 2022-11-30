@@ -26,10 +26,6 @@ namespace DeveloperConsole
                 DevConsole.OutPutConsole(conCommand.CommandName + ": " + conCommand.Description);
             }
         }
-
-
-
-
     }
 
 }
