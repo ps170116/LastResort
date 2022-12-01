@@ -20,8 +20,8 @@ public class CameraController : MonoBehaviour
     public float mouseX;
     public float mouseY;
 
-    float rotX;
-    float rotY;
+    public float rotX;
+    public float rotY;
 
     public bool camEnabled = true;
 
