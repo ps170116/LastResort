@@ -74,6 +74,7 @@ public class PlayerController : MonoBehaviour
     public static PlayerController instance;
     public bool onConsole;
 
+    public bool noclip;
     void Awake()
     {
         instance = this;
@@ -96,11 +97,13 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if(!onConsole)
         {
             GetInput();
         }
         //QueueJump();
+
 
         //GroundCheck
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -110,7 +113,7 @@ public class PlayerController : MonoBehaviour
             transform.position = originalPos;
         }
         //WallJump
-        if(checkwall.onWall && !isGrounded)
+        if(checkwall.onWall && !isGrounded && !noclip)
         {
  
             print("onWall");
@@ -155,15 +158,20 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(!dead)
+        if(!dead && !noclip)
         {
             Movement();
+        }
+        else if(!dead && noclip)
+        {
+            NoclipMovement();
         }
     }
 
 
     void Movement()
     {
+
         //movement for being grounded or in air
         if (isGrounded)
         {
@@ -262,9 +270,13 @@ public class PlayerController : MonoBehaviour
     {
         horzontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
+        if(!noclip)
+        {
+            moveVelocity = new Vector3(horzontal, 0, vertical).normalized;
+            moveVelocity = orientation.transform.TransformDirection(moveVelocity);
+        }
 
-        moveVelocity = new Vector3(horzontal, 0, vertical).normalized;
-        moveVelocity = orientation.transform.TransformDirection(moveVelocity);
+
         //moveVelocity = transform.TransformDirection(moveVelocity);
 
         crouching = Input.GetButton("Crouch");
@@ -283,6 +295,19 @@ public class PlayerController : MonoBehaviour
             return angle < slopeAngle && angle != 0;
         }
         return false;
+    }
+
+
+
+    public void NoclipMovement()
+    {
+        rb.useGravity = false;
+        collider.enabled = false;
+        transform.localRotation = Quaternion.Euler(CameraController.instance.rotX, CameraController.instance.rotY, 0);
+        Vector3 noclipVelocity = new Vector3(horzontal, 0, vertical);
+        noclipVelocity = transform.TransformDirection(noclipVelocity);
+        transform.position += noclipVelocity;
+
     }
 
     private Vector3 SlopeMoveDirection()

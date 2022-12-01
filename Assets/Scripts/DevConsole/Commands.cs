@@ -26,6 +26,12 @@ namespace DeveloperConsole
                 DevConsole.OutPutConsole(conCommand.CommandName + ": " + conCommand.Description);
             }
         }
+
+        [ConCommand("noclip", "Enable Noclip mode")]
+        public static void Noclip(bool enabled = false)
+        {
+            PlayerController.instance.noclip = enabled;
+        }
     }
 
 }

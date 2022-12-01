@@ -33,6 +33,13 @@ public class CastParameters : MonoBehaviour
             result = floatParsed;
             return result;
         }
+        bool boolParsed;
+        parsed = bool.TryParse(parameter, out boolParsed);
+        if(parsed)
+        {
+            result = boolParsed;
+            return result;
+        }
 
 
         result = parameter;
