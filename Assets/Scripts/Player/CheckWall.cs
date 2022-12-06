@@ -12,7 +12,6 @@ public class CheckWall : MonoBehaviour
 
     public List<Collider> cols = new List<Collider>();
 
-    private List<Collider> colsToDelete = new List<Collider>();
 
     MeshCollider m;
 

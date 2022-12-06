@@ -4,14 +4,20 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using DeveloperConsole;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Basic movement settings")]
     public float walkSpeed;
+    [SerializeField] float dashSpeed = 10;
+    public float noclipSpeed = 5;
     [SerializeField] float jumpPower;
     [SerializeField] float wallJumpPower;
     [SerializeField] float airAcceleration;
     [SerializeField] float friction;
+    [SerializeField] int MaxWalljumps = 3;
+    [SerializeField] int WallJumpCount;
 
     [Header("Jumping")]
     [SerializeField] bool autoJump;
@@ -33,7 +39,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector3 DashVelocity;
     [SerializeField] float DashAmount;
 
-    
+
 
     private Rigidbody rb;
     private CapsuleCollider collider;
@@ -41,6 +47,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform orientation;
 
     Vector3 moveVelocity;
+    Vector3 savedVelocity;
     Vector3 moveVelocity2;
     Vector3 airVelocity;
 
@@ -56,25 +63,18 @@ public class PlayerController : MonoBehaviour
     CheckWall checkwall;
     
 
-
     Vector3 originalPos;
     Vector3 Poc;
-
-
-    [Header("Health")]
-    public float health = 100;
 
     public float clingFade;
 
    [SerializeField] LayerMask wallMask;
 
-    GameObject testWall;
-
-
     public static PlayerController instance;
     public bool onConsole;
 
     public bool noclip;
+
     void Awake()
     {
         instance = this;
@@ -83,7 +83,6 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
 
         rb = GetComponent<Rigidbody>();
         collider = GetComponent<CapsuleCollider>();
@@ -97,6 +96,8 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
 
         if(!onConsole)
         {
@@ -116,36 +117,35 @@ public class PlayerController : MonoBehaviour
         if(checkwall.onWall && !isGrounded && !noclip)
         {
  
-            print("onWall");
             RaycastHit testHit;
-            if (Physics.Raycast(transform.position, checkwall.pos, out testHit, 1f, wallMask))
+            if (Physics.Raycast(transform.position, moveVelocity, out testHit, 1f, wallMask))
             {
                 
-                print("Against Wall");
                 if (rb.velocity.y < -1f)
                 {
                     rb.velocity = new Vector3(Mathf.Clamp(rb.velocity.x, -1f, 1f), -2f * clingFade, Mathf.Clamp(rb.velocity.z, -1f, 1f));
-                    print("Sliding down");
+                }
+                if (Input.GetButtonDown("Jump") && WallJumpCount < MaxWalljumps)
+                {
+                    WallJumpCount++;
+                    jumpQueued = true;
+                    rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+                    //Vector3 wallJumpPos = base.transform.position - checkwall.GetClosestPoint();
+
+                    //Vector3 vector = new Vector3(wallJumpPos.normalized.x, 1f, wallJumpPos.normalized.z);
+                    //rb.AddForce(vector * wallJumpPower * 60f);
+
+                    Vector3 tempVec;
+                    tempVec = new Vector3(testHit.normal.x, 1.5f, testHit.normal.z);
+                    rb.AddForce(tempVec * 5, ForceMode.Impulse);
+                    Invoke("ResetJump", 0.2f);
                 }
             }
-            if (Input.GetButtonDown("Jump"))
-            {
-                jumpQueued = true;
-                rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-                //Vector3 wallJumpPos = base.transform.position - checkwall.GetClosestPoint();
-
-                //Vector3 vector = new Vector3(wallJumpPos.normalized.x, 1f, wallJumpPos.normalized.z);
-                //rb.AddForce(vector * wallJumpPower * 60f);
-
-                print("Jumping");
-                Vector3 tempVec = new Vector3(testHit.normal.x, 1.5f, testHit.normal.z);
-                rb.AddForce(tempVec * 5, ForceMode.Impulse);
-                Invoke("ResetJump", 0.2f);
-            }
+    
 
         }
         //Dash
-        if (dashing)
+        if (dashing && !noclip)
         {
             DashVelocity = moveVelocity;
             if(moveVelocity.x == 0 && moveVelocity.z == 0)
@@ -175,6 +175,7 @@ public class PlayerController : MonoBehaviour
         //movement for being grounded or in air
         if (isGrounded)
         {
+            WallJumpCount = 0;
             moveVelocity2 = new Vector3(moveVelocity.x * walkSpeed, rb.velocity.y, moveVelocity.z * walkSpeed);
 
             if (crouching)
@@ -240,7 +241,7 @@ public class PlayerController : MonoBehaviour
 
     void Dash()
     {
-        moveVelocity2 = new Vector3(DashVelocity.x * walkSpeed, 0, DashVelocity.z * walkSpeed);
+        moveVelocity2 = new Vector3(DashVelocity.x * dashSpeed, 0, DashVelocity.z * dashSpeed);
         rb.velocity = moveVelocity2 * 1.2f;
     }
 
@@ -299,15 +300,13 @@ public class PlayerController : MonoBehaviour
 
 
 
+  
     public void NoclipMovement()
     {
-        rb.useGravity = false;
-        collider.enabled = false;
-        transform.localRotation = Quaternion.Euler(CameraController.instance.rotX, CameraController.instance.rotY, 0);
+        orientation.transform.localRotation = Quaternion.Euler(CameraController.instance.rotX, CameraController.instance.rotY, 0);
         Vector3 noclipVelocity = new Vector3(horzontal, 0, vertical);
-        noclipVelocity = transform.TransformDirection(noclipVelocity);
-        transform.position += noclipVelocity;
-
+        noclipVelocity = orientation.transform.TransformDirection(noclipVelocity);
+        rb.velocity = noclipVelocity * Time.fixedDeltaTime * noclipSpeed * 10 ;
     }
 
     private Vector3 SlopeMoveDirection()
@@ -316,7 +315,7 @@ public class PlayerController : MonoBehaviour
     }
 
     [ConCommand("set_speed", "Set speed of player")]
-    public static void SetSpeed(float speed = 9 )
+    public void SetSpeed(float speed = 9 )
     {
         instance.walkSpeed = speed;
         
@@ -328,6 +327,17 @@ public class PlayerController : MonoBehaviour
         instance.jumpPower = jumpPower;
     }
 
+    public  void EnableGravity(bool enable)
+    {
+        rb.useGravity = enable;
+        Debug.Log(enable);
+    }
+
+    public  void EnableCollision(bool enable)
+    {
+        collider.enabled = enable;
+        Debug.Log(enable);
+    }
     
     
     

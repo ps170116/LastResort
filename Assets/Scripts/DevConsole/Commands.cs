@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DeveloperConsole
 {
-    public class Commands : MonoBehaviour
+    public class Commands
     {
         //This class is pure for running certain commands that are more generic.
         //example: help command to show all the commands in a list
@@ -22,7 +22,7 @@ namespace DeveloperConsole
 
             if(DevConsole.commands.ContainsKey(command))
             {
-                ConCommand conCommand = DevConsole.commands[command];
+                ConCommandAttribute conCommand = DevConsole.commands[command];
                 DevConsole.OutPutConsole(conCommand.CommandName + ": " + conCommand.Description);
             }
         }
@@ -31,7 +31,12 @@ namespace DeveloperConsole
         public static void Noclip(bool enabled = false)
         {
             PlayerController.instance.noclip = enabled;
+            PlayerController.instance.EnableCollision(!enabled);
+            PlayerController.instance.EnableGravity(!enabled);
+
         }
+
+
     }
 
 }

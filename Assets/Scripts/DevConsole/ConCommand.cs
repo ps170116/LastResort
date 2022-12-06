@@ -13,17 +13,24 @@ namespace DeveloperConsole
         MethodInfo MethodInfo { get; set; }
     }
 
-    public class ConCommand : Attribute, IConcommand
+    /// <summary>
+    /// Allows you to create a command
+    /// first give the command name then a discription
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true, Inherited = false)]
+    public class ConCommandAttribute : Attribute, IConcommand
     {
 
-        public static ConCommand instance;
+        public static ConCommandAttribute instance;
 
         public string CommandName { get; set; }
         public string Description { get; set; }
 
         public MethodInfo MethodInfo { get; set; }
+        public Action action;
 
-        public ConCommand(string commandName, string description)
+
+        public ConCommandAttribute(string commandName, string description)
         {
             CommandName = commandName;
             Description = description;

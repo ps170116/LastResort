@@ -10,10 +10,10 @@ namespace DeveloperConsole
 {
     public static class DevConsole
     {
-        public static Dictionary<string, ConCommand> commands = new Dictionary<string, ConCommand>();
-        public static List<ConCommand> commandHistory = new List<ConCommand>(); 
+        public static Dictionary<string, ConCommandAttribute> commands = new Dictionary<string, ConCommandAttribute>();
+        public static List<ConCommandAttribute> commandHistory = new List<ConCommandAttribute>();
 
-    
+
         /// <summary>
         /// Removes the first item of the list and returns an array of the args
         /// </summary>
@@ -59,7 +59,7 @@ namespace DeveloperConsole
         {
             OutPutConsole("Loading commands..");
             
-            foreach (var command in FindAttribute<ConCommand>(assemblies))
+            foreach (var command in FindAttribute<ConCommandAttribute>(assemblies))
             {
                 if(!commands.ContainsKey(command.CommandName))
                 {
@@ -115,7 +115,7 @@ namespace DeveloperConsole
             string name = input[0];
             Debug.Log("RunCommand" + name);
 
-            ConCommand command = GetConCommand(name);
+            ConCommandAttribute command = GetConCommand(name);
 
             if (command != null)
             {
@@ -131,7 +131,7 @@ namespace DeveloperConsole
         }
 
 
-        public static ConCommand GetConCommand(string name)
+        public static ConCommandAttribute GetConCommand(string name)
         {
             if(commands.ContainsKey(name))
             {
@@ -140,7 +140,7 @@ namespace DeveloperConsole
             return null;
         }
 
-        public static object ExecuteCommand(ConCommand command, params object[] args)
+        public static object ExecuteCommand(ConCommandAttribute command, params object[] args)
         {
             Debug.Log("Executecommand" + command.CommandName);
 
@@ -166,11 +166,23 @@ namespace DeveloperConsole
                 }
                 args = tempArgs;
             }
+            object methodObject = Activator.CreateInstance(command.MethodInfo.ReflectedType);
+
+  
 
             try
             {
-                OutPutConsole(command.CommandName + "");
-                command.MethodInfo.Invoke(null, args);
+                if(command.MethodInfo.IsStatic)
+                {
+                    OutPutConsole(command.CommandName + "static");
+                    command.MethodInfo.Invoke(null, args);
+                }
+                else
+                {
+                    OutPutConsole(command.CommandName + "nonstatic");
+                    command.MethodInfo.Invoke(methodObject, args);
+                }
+
             }
             catch (Exception e)
             {
@@ -180,6 +192,6 @@ namespace DeveloperConsole
             return null;
         }
 
-        
+
     }
 }
