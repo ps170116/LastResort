@@ -17,6 +17,6 @@ public class ShowFPS : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        fpsText.text = (1f / Time.deltaTime).ToString();
+        fpsText.text = Mathf.Round((1f / Time.deltaTime)).ToString();
     }
 }

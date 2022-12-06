@@ -35,7 +35,7 @@ namespace DeveloperConsole
         // Start is called before the first frame update
         void Start()
         {
-            DevConsole.LoadCommands(new Assembly[] { Assembly.GetAssembly(typeof(ConCommand)) });
+            DevConsole.LoadCommands(new Assembly[] { Assembly.GetAssembly(typeof(ConCommandAttribute)) });
             inputButton.onClick.AddListener(GetInput);
             CloseButton.onClick.AddListener(CloseConsole);
         }
@@ -71,7 +71,6 @@ namespace DeveloperConsole
 
         public void GetInput()
         {
-
             string[] command = input.text.Split(' ');
             DevConsole.RunCommand(command);
             input.text = "";
